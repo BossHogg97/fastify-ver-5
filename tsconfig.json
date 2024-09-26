@@ -1,0 +1,14 @@
+{
+  "extends": "@clabnet/configs-ts",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./*"]
+    }
+  },
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["**/*.ts", "**/*.d.ts", "**/*.vue", "./vite.config.ts"],
+  "exclude": ["**/__tests__/*"]
+}

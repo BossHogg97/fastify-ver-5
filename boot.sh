@@ -1,0 +1,1 @@
+tsx ./dist/server.js;
