@@ -13,10 +13,6 @@ export class ConfigService {
   public readonly swaggerServerUrl: string | undefined
   public readonly lokiServerUrl: string | undefined
   public readonly proxyPath: string | undefined
-  public readonly keycloakBaseUrl: URL | undefined
-  public readonly keycloakRealm: string | undefined
-  public readonly keycloakClientId: string | undefined
-  public readonly keycloakClientSecret: string | undefined
 
   /**
    * The constructor function for the ConfigService class.
@@ -43,9 +39,6 @@ export class ConfigService {
       SWAGGER_SERVER_URL: z.string().default('http://localhost:5015'),
       LOKI_SERVER_URL: z.string().optional().default(''),
       PROXY_PATH: z.string().optional().default(''),
-      KEYCLOAK_BASE_URL: z.string().optional(),
-      KEYCLOAK_REALM: z.string().optional(),
-      KEYCLOAK_CLIENT_ID: z.string().optional()
     })
 
     const parsed = appConfigSchema.safeParse(process.env)
@@ -62,9 +55,6 @@ export class ConfigService {
     this.swaggerServerUrl = parsed.data.SWAGGER_SERVER_URL
     this.lokiServerUrl = parsed.data.LOKI_SERVER_URL
     this.proxyPath = parsed.data.PROXY_PATH
-    this.keycloakBaseUrl = new URL(parsed.data.KEYCLOAK_BASE_URL)
-    this.keycloakRealm = parsed.data.KEYCLOAK_REALM
-    this.keycloakClientId = parsed.data.KEYCLOAK_CLIENT_ID
 
     // console.log('✅ Environment variables loaded', parsed.data)
     // console.log(typeof this.booleanString.parse(parsed.data.TOKEN_AUTH))
