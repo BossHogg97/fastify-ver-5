@@ -81,7 +81,7 @@ export default fp(async (fastify: FastifyInstance) => {
       clientId: config.environment === 'production' ? 'swagger-authservice' : 'swagger-authservice-localhost'
     },
     transformSpecification: (swaggerObject, req, reply) => {
-      swaggerObject.servers[0].url = config.environment === 'production' ? `https://${req.hostname}${config.proxyPath}` : `http://${req.hostname}`
+      swaggerObject.servers[0].url = config.environment === 'production' ? `https://${req.hostname}${config.proxyPath}` : `http://${req.hostname}:${config.port}`
       return swaggerObject
     },
     uiConfig: {
