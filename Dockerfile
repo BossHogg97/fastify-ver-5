@@ -39,7 +39,7 @@ COPY --from=builder   /temp-apps/node_modules/      node_modules
 
 # Set environment variables for configuration and defaults
 ENV NODE_ENV=production
-ENV PORT=5015
+ENV PORT=5003
 
 # Expose the port on which the application will run
 EXPOSE $PORT
