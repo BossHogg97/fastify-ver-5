@@ -32,7 +32,6 @@
     "test:unit": "cross-env NODE_ENV=test vitest --coverage"
   },
   "dependencies": {
-    "@fastify/autoload": "^6.0.3",
     "@fastify/cors": "^11.1.0",
     "@fastify/env": "^5.0.1",
     "@fastify/mongodb": "^9.0.2",
