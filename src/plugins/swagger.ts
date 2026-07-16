@@ -1,88 +1,130 @@
-import fp from 'fastify-plugin'
-import { fastifySwagger } from '@fastify/swagger'
-import fastifySwaggerUI from '@fastify/swagger-ui'
-import { withRefResolver } from 'fastify-zod'
-import type { FastifyInstance } from 'fastify'
-import { formatToDateTime } from '@/utils/dateUtil'
+// Plugin Imports
+import swagger from '@fastify/swagger'
+import swaggerUI from '@fastify/swagger-ui'
 
-import container from '@/core/diContainer'
+// Fastif Imports
+import fastifyPlugin from 'fastify-plugin'
+import { withRefResolver } from 'fastify-zod'
+
+// Utility Imports
+import { readFileSync } from 'fs'
+import path from 'path'
 
 /**
- * This plugins add Swagger for API documentation
- *
- * @see https://github.com/fastify/fastify-swagger
- * @see https://github.com/fastify/fastify-swagger-ui
+ * Swagger plugin configuration for Fastify
+ * Provides API documentation with OAuth2 support
  */
-export default fp(async (fastify: FastifyInstance) => {
-  const buildDate = formatToDateTime(new Date())
+export default fastifyPlugin(async function (
+  fastify: any,
+  options: {
+    config: any
+    projectLogo: string
+    components?: any
+    security?: any
+    transform?: any
+    transformObject?: any
+    configUI?: Record<string, any>
+  }
+) {
+  // Get application metadata from package.json
+  const appMeta = JSON.parse(readFileSync(`${process.cwd()}/package.json`, 'utf-8')) as { name: string; version: string; description: string }
 
-  const config = container.get('config.service')
+  const { projectLogo } = options
+  const staticPath = path.join(process.cwd(), 'packages/sharedbe/static')
 
+  // Register Swagger schema generator
   await fastify.register(
-    fastifySwagger,
+    swagger,
     withRefResolver({
+      ...(options.transform && { transform: options.transform }),
+      ...(options.transformObject && {
+        transformObject: options.transformObject
+      }),
       openapi: {
         info: {
-          title: 'Fastify-boilerplate',
-          description: 'Boilerplate',
-          version: `ver. ${process.env['npm_package_version']} | Build date: ${buildDate}`
+          title: `${options.config.PROJECT_NAME}`,
+          description: `${appMeta.description} <br/><br/><img src="${projectLogo}" width="30%" />`,
+          version: appMeta.version
         },
         servers: [
           {
-            url: `${config.swaggerServerUrl}${config.proxyPath}`
+            url: `${options.config.SWAGGER_SERVER_URL}${options.config.PROXY_PATH}`
           }
         ],
 
-        components: {
-          securitySchemes: {
-            // Oauth2 with PKCE flow
-            oauth2: {
-              type: 'oauth2',
-              description: 'This API uses OAuth 2 with the authorizationCode grant flow',
-              flows: {
-                authorizationCode: {
-                  authorizationUrl: `${config.keycloakBaseUrl}/realms/xxxx/protocol/openid-connect/auth`,
-                  tokenUrl: `${config.keycloakBaseUrl}/realms/xxxx/protocol/openid-connect/token`,
-                  scopes: {}
+        components: !options.components
+          ? {
+              securitySchemes: {
+                oauth2: {
+                  type: 'oauth2',
+                  description: '** OAuth2 with authorizationCode grant flow **',
+                  flows: {
+                    authorizationCode: {
+                      authorizationUrl: `${options.config.KEYCLOAK_BASE_URL}/realms/pomini/protocol/openid-connect/auth`,
+                      tokenUrl: `${options.config.KEYCLOAK_BASE_URL}/realms/pomini/protocol/openid-connect/token`,
+                      scopes: {}
+                    }
+                  }
+                },
+                bearerAuth: {
+                  type: 'http',
+                  description: '** OAuth2 Bearer token flow **',
+                  scheme: 'bearer',
+                  bearerFormat: 'JWT'
                 }
               }
-            },
-            // Bearer token flow
-            bearerAuth: {
-              type: 'http',
-              scheme: 'bearer',
-              bearerFormat: 'JWT' //optional, arbitrary value for documentation purposes
             }
-          }
-        },
-        security: [
-          {
-            oauth2: [],
-            bearerAuth: []
-          }
-        ]
-      }
+          : options.components,
+
+        security: !options.security ? [{ oauth2: [] }, { bearerAuth: [] }] : options.security
+      },
+      hideUntagged: true
     })
   )
 
-  /**
-   * Definition API to address the swagger start page
-   */
-  await fastify.register(fastifySwaggerUI, {
+  // Register Swagger UI
+  await fastify.register(swaggerUI, {
     routePrefix: '/swagger',
+    indexPrefix: options.config.PROXY_PATH === '/' ? '' : options.config.PROXY_PATH,
     staticCSP: false,
-    initOAuth: {
-      clientId: config.environment === 'production' ? 'swagger-authservice' : 'swagger-authservice-localhost'
-    },
-    transformSpecification: (swaggerObject, req, reply) => {
-      swaggerObject.servers[0].url = config.environment === 'production' ? `https://${req.hostname}${config.proxyPath}` : `http://${req.hostname}:${config.port}`
+    initOAuth: !options.components
+      ? {
+          clientId:
+            options.config.NODE_ENV === 'production'
+              ? `swagger-${options.config.PROJECT_NAME.toLowerCase().replace(/_/g, '-')}`
+              : `swagger-${options.config.PROJECT_NAME.toLowerCase().replace(/_/g, '-')}-localhost`
+        }
+      : {},
+    transformSpecification: (swaggerObject, req, _reply) => {
+      swaggerObject.servers[0].url =
+        options.config.NODE_ENV === 'production' ? `https://${req.hostname}${options.config.PROXY_PATH}` : `http://${req.hostname}:${req.port}`
       return swaggerObject
     },
+    logo: {
+      type: 'image/png',
+      content: readFileSync(path.join(staticPath, 'Pomini_palla_100x92.png'))
+    },
+    theme: {
+      favicon: [
+        {
+          filename: 'favicon.png',
+          rel: 'icon',
+          sizes: '16x16',
+          type: 'image/png',
+          content: readFileSync(path.join(staticPath, 'favicon.ico'))
+        }
+      ]
+    },
     uiConfig: {
-      docExpansion: 'list',
-      deepLinking: false
+      docExpansion: 'none',
+      deepLinking: false,
+      tryItOutEnabled: true,
+      filter: true,
+      persistAuthorization: true,
+      // set custom opts
+      ...options.configUI
     }
   })
 
-  fastify.log.debug('Registered plugins swagger')
+  fastify.log.debug('Registered plugin fastify-swagger')
 })
