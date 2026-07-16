@@ -31,8 +31,6 @@
     "test:unit": "cross-env NODE_ENV=test vitest --coverage"
   },
   "dependencies": {
-    "@autotelic/pino-seq-transport": "^0.1.0",
-    "@clabnet/configs-ts": "^0.1.16",
     "@fastify/autoload": "^6.0.3",
     "@fastify/cors": "^10.0.1",
     "@fastify/env": "^5.0.1",
@@ -100,9 +98,5 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.8",
     "vitest-canvas-mock": "^0.3.3"
-  },
-  "engines": {
-    "node": ">=21.7.3",
-    "pnpm": ">=9.0.0"
   }
 }

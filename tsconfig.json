@@ -1,6 +1,45 @@
 {
-  "extends": "@clabnet/configs-ts",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    // Output
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    // Type Checking
+    "strict": true,
+    "noImplicitAny": false, // Catch implicit any
+    "strictNullChecks": false, // Essential for null safety
+    "strictFunctionTypes": true, // Prevent unsound assignments
+    "noUnusedLocals": true, // Catch unused variables
+    "noUnusedParameters": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true, // Catch missing breaks
+    "noUncheckedIndexedAccess": true, // Safer array/object access
+
+    // Module Resolution
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler", // Changed: better for modern tooling
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // JavaScript Support
+    "allowJs": true,
+
+    // JSX
+    "jsx": "preserve",
+
+    // Libraries
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+
+    // Advanced
+    "skipLibCheck": true,
+    "useDefineForClassFields": true,
+    "importHelpers": true,
+
     "paths": {
       "@/*": ["./src/*"],
       "~/*": ["./*"]
@@ -9,6 +48,15 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["**/*.ts", "**/*.d.ts", "**/*.vue", "./vite.config.ts"],
-  "exclude": ["**/__tests__/*"]
+  "typeRoots": ["**/node_modules/@types", "**/types"],
+  "include": ["src/**/*", "__test__/**/*"],
+  "exclude": [
+    "**/node_modules",
+    "./dist/**/*",
+    "coverage",
+    "e2e",
+    "benchmark",
+    "mock",
+    "docs"
+  ]
 }

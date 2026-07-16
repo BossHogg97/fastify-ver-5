@@ -1,16 +1,19 @@
-/**
- * Imports and re-exports the default Prettier configuration from the @clabnet/configs-prettier package.
- * This allows sharing the same Prettier rules across different projects.
- */
+/** @type {import('prettier').Config} **/
+const config = {
+  arrowParens: "always",
+  printWidth: 160,
+  singleQuote: true,
+  singleAttributePerLine: false,
+  trailingComma: "none",
+  bracketSpacing: true,
+  tabWidth: 2,
+  semi: false,
+  vueIndentScriptAndStyle: true,
+  // plugins: [
+  //   'prettier-plugin-tailwindcss'
+  // ],
+  endOfLine: "lf",
+  quoteProps: "as-needed",
+};
 
-/*
- * Use this line when using type = module on package.json
- */
-export { default } from '@clabnet/configs-prettier'
-
-/* otherwise */
-
-/*
- * Use this line when using type = commonjs on package.json
- */
-// module.exports = require('@clabnet/configs-prettier')
+export default config;

@@ -61,12 +61,6 @@ export default fp(async (fastify: FastifyInstance) => {
             bearerAuth: []
           }
         ]
-        // tags: [
-        //   {
-        //     name: 'Root',
-        //     description: 'Root endpoints'
-        //   }
-        // ]
       }
     })
   )
