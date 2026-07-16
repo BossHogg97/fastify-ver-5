@@ -1,5 +1,5 @@
 import { loggerManager, getLogger, createServerOptions } from '@/core/index'
-import { dbManager, migrateDatabase } from '@/db/index'
+import { dbManager, migrateDatabase, mongoManager } from '@/db/index'
 
 import figlet from 'figlet'
 import { createApp } from './app'
@@ -34,7 +34,20 @@ const start = async () => {
   }
 
   // 2.2 - MongoDB init
-  // TODO Implementare inizializzazione
+  try {
+    mongoManager.initialize({
+      MONGO_DATABASE: config.MONGO_DATABASE,
+      MONGO_URL: config.MONGO_URL,
+      MONGO_USER: config.MONGO_USER,
+      MONGO_PASS: config.MONGO_PASS
+    })
+
+    await mongoManager.connect()
+    logger.debug('Database connected successfully')
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to initialize or connect to database')
+    process.exit(1)
+  }
 
   // 3. Run database migrations
   try {
@@ -93,6 +106,9 @@ const start = async () => {
     await dbManager.close()
     process.exit(1)
   }
+
+  logger.info({ url: serverUrl }, `Swagger docs available at ${serverUrl}/swagger`)
+  logger.info({ projectName: config.PROJECT_NAME, environment: config.NODE_ENV, host, port }, `${config.PROJECT_NAME} IS READY`)
 }
 
 start()

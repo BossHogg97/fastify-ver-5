@@ -12,12 +12,18 @@ export const envSchema = z.object({
 
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
 
-  // Database Configuration
+  // PostgreSQL Configuration
   POSTGRES_HOST: z.string(),
   POSTGRES_USER: z.string(),
   POSTGRES_PASSWORD: z.string(),
-  POSTGRES_DB_NAME: z.string().default('fastifyboilerplatedb'),
+  POSTGRES_DB_NAME: z.string().default('postgreTest'),
   POSTGRES_DB_PORT: z.coerce.number().default(5432),
+
+  // MongoDB Configuration
+  MONGO_URL: z.string().url().default('mongodb://localhost:27017'),
+  MONGO_USER: z.string().default('dev'),
+  MONGO_PASS: z.string().default('dev'),
+  MONGO_DATABASE: z.string().default('mongoTest'),
 
   // RabbitMQ
   RABBITMQ_ENABLED: z
