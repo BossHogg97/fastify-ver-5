@@ -30,7 +30,7 @@ export default fastifyPlugin(async function (
   const appMeta = JSON.parse(readFileSync(`${process.cwd()}/package.json`, 'utf-8')) as { name: string; version: string; description: string }
 
   const { projectLogo } = options
-  const staticPath = path.join(process.cwd(), 'packages/sharedbe/static')
+  // const staticPath = path.join(process.cwd(), 'packages/sharedbe/static')
 
   // Register Swagger schema generator
   await fastify.register(
@@ -52,31 +52,10 @@ export default fastifyPlugin(async function (
           }
         ],
 
-        components: !options.components
-          ? {
-              securitySchemes: {
-                oauth2: {
-                  type: 'oauth2',
-                  description: '** OAuth2 with authorizationCode grant flow **',
-                  flows: {
-                    authorizationCode: {
-                      authorizationUrl: `${options.config.KEYCLOAK_BASE_URL}/realms/pomini/protocol/openid-connect/auth`,
-                      tokenUrl: `${options.config.KEYCLOAK_BASE_URL}/realms/pomini/protocol/openid-connect/token`,
-                      scopes: {}
-                    }
-                  }
-                },
-                bearerAuth: {
-                  type: 'http',
-                  description: '** OAuth2 Bearer token flow **',
-                  scheme: 'bearer',
-                  bearerFormat: 'JWT'
-                }
-              }
-            }
-          : options.components,
+        components: options.components,
 
-        security: !options.security ? [{ oauth2: [] }, { bearerAuth: [] }] : options.security
+        // !! Add security options here
+        security: []
       },
       hideUntagged: true
     })
@@ -87,34 +66,34 @@ export default fastifyPlugin(async function (
     routePrefix: '/swagger',
     indexPrefix: options.config.PROXY_PATH === '/' ? '' : options.config.PROXY_PATH,
     staticCSP: false,
-    initOAuth: !options.components
-      ? {
-          clientId:
-            options.config.NODE_ENV === 'production'
-              ? `swagger-${options.config.PROJECT_NAME.toLowerCase().replace(/_/g, '-')}`
-              : `swagger-${options.config.PROJECT_NAME.toLowerCase().replace(/_/g, '-')}-localhost`
-        }
-      : {},
+    // initOAuth: !options.components
+    //   ? {
+    //       clientId:
+    //         options.config.NODE_ENV === 'production'
+    //           ? `swagger-${options.config.PROJECT_NAME.toLowerCase().replace(/_/g, '-')}`
+    //           : `swagger-${options.config.PROJECT_NAME.toLowerCase().replace(/_/g, '-')}-localhost`
+    //     }
+    //   : {},
     transformSpecification: (swaggerObject, req, _reply) => {
       swaggerObject.servers[0].url =
         options.config.NODE_ENV === 'production' ? `https://${req.hostname}${options.config.PROXY_PATH}` : `http://${req.hostname}:${req.port}`
       return swaggerObject
     },
-    logo: {
-      type: 'image/png',
-      content: readFileSync(path.join(staticPath, 'Pomini_palla_100x92.png'))
-    },
-    theme: {
-      favicon: [
-        {
-          filename: 'favicon.png',
-          rel: 'icon',
-          sizes: '16x16',
-          type: 'image/png',
-          content: readFileSync(path.join(staticPath, 'favicon.ico'))
-        }
-      ]
-    },
+    // logo: {
+    //   type: 'image/png',
+    //   content: readFileSync(path.join(staticPath, 'Pomini_palla_100x92.png'))
+    // },
+    // theme: {
+    //   favicon: [
+    //     {
+    //       filename: 'favicon.png',
+    //       rel: 'icon',
+    //       sizes: '16x16',
+    //       type: 'image/png',
+    //       content: readFileSync(path.join(staticPath, 'favicon.ico'))
+    //     }
+    //   ]
+    // },
     uiConfig: {
       docExpansion: 'none',
       deepLinking: false,
